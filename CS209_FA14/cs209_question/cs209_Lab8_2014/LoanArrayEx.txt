@@ -1,0 +1,171 @@
+
+package layoutexs;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
+
+public class LoanArrayEx extends JFrame {    
+    // Prompts for user input
+    private JLabel label1, label2, label3, label4, label6;
+    // Mechanisms for user input
+    private JTextField textfield1, textfield2, textfield3, textfield4;
+    private JComboBox typeJCB;  // The JComboBox for type selection
+        
+    // Mechanism for output display
+    private JTextArea textDisplay;        // Output display area
+    private int textDisplayWidth = 25;    // Width of the JTextArea
+    private int textDisplayHeight = 18;   // Height of the JTextArea
+    private boolean cannotAddFlag = false; // Indicates whether loan can be added
+    
+    private final int MAX_LOANS = 7;  // The maximum number of loans allowed
+    private int countLoans = 0;        // The number of loans added to array
+    private Loan loanArray [] = new Loan[MAX_LOANS];
+    
+    private String typeNames[] = {"Residential","Commercial","Agricultural","Unspecified"};
+    private String selectedType = "Residential";
+    
+    // The main method required for an application program
+    public static void main( String[] args )  {
+        JFrame frame =  new LoanArrayEx( ); // Construct the window
+        frame.setSize( new Dimension( 360, 600 ) );     // Set its size
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible( true );   // Make the window visible
+    }
+    
+    public LoanArrayEx() {
+        super("GUI Demonstration");
+               setLayout( new BorderLayout() );
+        
+        JPanel jpan = new JPanel();
+        jpan.setLayout(new GridLayout(5,2));
+        jpan.setBorder(new EtchedBorder());
+        add(jpan,BorderLayout.NORTH);
+        
+        // Display the maximum number of loans to be processed
+        label1 = new JLabel("Number of Loans:");
+        jpan.add( label1);  
+        textfield1 = new JTextField( 3 );
+        textfield1.setEditable(false);
+        textfield1.setText(Integer.toString(countLoans));
+        jpan.add( textfield1 );  // put input JTextField on JPanel
+        
+        label2 = new JLabel("Max # of Loans:");
+        jpan.add( label2 );  
+        textfield2 = new JTextField( 3);
+        textfield2.setText(Integer.toString(MAX_LOANS));
+        textfield2.setEditable(false);
+        jpan.add( textfield2 );  // put input JTextField on JPanel
+        
+        // Create prompt and input mechanism to get loan type from user
+        label6 = new JLabel("Loan Type:");
+        jpan.add( label6 );  
+        typeJCB = new JComboBox(typeNames);
+        typeJCB.setMaximumRowCount(4);
+        jpan.add( typeJCB );  // put input JTextField on JPanel
+
+        // Create prompt and input mechanism to get borrower name from user
+        label3 = new JLabel("Name:");
+        jpan.add( label3 );  
+        textfield3 = new JTextField( 15 );
+        jpan.add( textfield3 );  // put input JTextField on JPanel       
+        
+        // Create prompt and input mechanism to get loan number from user
+        label4 = new JLabel("Loan ID Number:");
+        jpan.add( label4 );  
+        textfield4 = new JTextField( Integer.toString(countLoans+2), 15 );
+        jpan.add( textfield4 );   // put input JTextField on JPanel        
+
+        // Set up JTextArea to display information on all the loans
+        textDisplay = new JTextArea( getDataStringAllLoans(),
+                textDisplayHeight,textDisplayWidth);
+        textDisplay.setLineWrap( true );
+        textDisplay.setWrapStyleWord( true );
+        textDisplay.setBorder(new TitledBorder("Loan List"));
+        add(textDisplay,BorderLayout.CENTER);
+        
+        // Listener will respond to a user hitting Enter in any JTextField
+        MyActionListener myActListener = new MyActionListener();
+        textfield3.addActionListener( myActListener );
+        textfield4.addActionListener( myActListener );     
+   
+        // Listener will respond to a user selecting from JComboBox
+        MyItemListener myItemListener = new MyItemListener();
+        typeJCB.addItemListener(myItemListener);  
+        
+        // Display data on all Loans in the JTextArea
+        displayLoanData();
+    }    
+    
+    private void displayLoanData(){
+        setDisplayFields();
+        textDisplay.setText(getDataStringAllLoans());
+    }
+    
+    // Create and insert the new loan into array
+    private void addLoanToArray( String id, String nam, String typ ){
+        if ( countLoans < MAX_LOANS ) {
+            Loan ln = new Loan(nam, Integer.parseInt(id), typ);
+            loanArray[countLoans] = ln;
+            countLoans++;
+        }
+    }
+    
+    //  Return the loan instance (object) correponding to the pNumb parameter
+    private Loan getLoanFromArray( int lnNumb ) {
+        Loan ln = null;
+        if ( lnNumb < countLoans ) {
+            ln = loanArray[lnNumb];
+        }
+        return ln;
+    }
+    
+    // Set the contents of the JTextFields
+    private void setDisplayFields() {
+        textfield1.setText( Integer.toString(countLoans) );
+        textfield2.setText( Integer.toString(MAX_LOANS) );
+        textfield3.setText("");
+        textfield4.setText("");
+    }
+    
+    // Get the string comprised of all the data on all loans
+    private String getDataStringAllLoans() {
+        String displayStr = "";
+        
+        // Add the information on all loans to the display string
+        displayStr = displayStr + "\n  DOLLARS & 'SENSE' LOANS:\n\n ";
+        for ( int i = 0; i < countLoans; i++ ) {
+            displayStr += (i+1) + ". " + loanArray[i].toString() + "\n ";
+        }
+        if ( cannotAddFlag )
+            displayStr += "\nCannot add loans - the array is full\n";
+        return displayStr;
+    }
+    
+    class MyActionListener implements ActionListener {
+        // Process user's action in JTextField input
+        public void actionPerformed( ActionEvent e) {
+                if ( countLoans < MAX_LOANS )  {                    
+                    String name = textfield3.getText();  
+                    String idNumber = textfield4.getText();
+                    addLoanToArray(idNumber, name, selectedType);
+                } else {
+                    cannotAddFlag = true;
+                }                    
+                    
+            displayLoanData();
+        }
+    }
+    
+    class MyItemListener implements ItemListener {
+        public void itemStateChanged(ItemEvent e) {
+            
+            // If one of the items in the JComboBox was selected,
+            // set the selectedDept variable to the user's selection
+            if (e.getSource() == typeJCB) {
+                selectedType = typeNames[typeJCB.getSelectedIndex()];    
+            } 
+        }        
+    }
+}
+

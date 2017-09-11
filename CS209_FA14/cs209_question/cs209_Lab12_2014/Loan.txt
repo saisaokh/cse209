@@ -1,0 +1,140 @@
+
+package fileexs;
+import java.text.*;
+// Class Name:  Loan
+// Purpose:  To provide a means of representing data attributes for a loan
+//           loans (e.g., name,  ID number, etc.) and provide
+//           access methods to set and get the data attributes and display
+//           the data attributes.
+public class Loan {
+  protected String name;        // Borrower's name
+  protected int idNumber;       // Loan's ID number
+  protected String loanType = "";  // Loan type 
+  protected String cityName;  // Loan's city of origin
+  protected double propertyCost;     // Loan's property cost
+  protected double downPayment; // Loan's down payment
+ protected int numberOfYears;   //Loan's number of years
+ 
+  protected DecimalFormat prec2 = new DecimalFormat("$#.00");
+  protected static int numberOfLoans = 0;
+
+  // Default constructor
+  public Loan() {
+      numberOfLoans++;
+  }
+
+  // Constructor that initializes instance variables with info passed
+  //   via parameters
+  public Loan ( String nam, int idnum ) { 
+     this();
+     name = nam;
+     idNumber = idnum;
+  }
+  
+    public Loan ( String nam, int idnum, String typ ) { 
+     this();
+     name = nam;
+     idNumber = idnum;
+     loanType = typ;
+  }
+  
+   public Loan ( String nam, int idnum, double pc, double dp, int yrs ) { 
+     this();
+     name = nam;
+     idNumber = idnum;
+     propertyCost = pc;
+     downPayment = dp; numberOfYears = yrs;
+  }
+   
+  public Loan ( String nam, int idnum, String cty, double pc, double dp,int yrs ) { 
+     this();
+     name = nam;
+     idNumber = idnum;
+     cityName = cty;
+     propertyCost = pc;
+ downPayment = dp; 
+   numberOfYears = yrs;
+  }
+   
+   public Loan ( String nam, int idnum, String typ, String cty, double pc, double dp, int yrs ) { 
+     this();
+     name = nam;
+     idNumber = idnum;
+     loanType = typ;
+     cityName = cty;
+     propertyCost = pc;
+  downPayment = dp;
+  numberOfYears = yrs;
+  }
+   
+   
+  
+  public static int getNumberOfLoans() {
+      return numberOfLoans;
+  }
+
+  // Set the name attribute (instance variable) of the object
+  public void setName ( String nam ) {
+     name = nam;
+  }
+
+  // Set the ID number attribute (instance variable) of the object
+   public void setIdNumber ( int idn ) {
+     idNumber = idn;
+  }
+   
+   // Set the loan type attribute (instance variable) of the object
+   public void setLoanType ( String typ ){
+       loanType = typ;
+   }
+
+  // Set the property cost attribute (instance variable) of the object
+   public void setPropertyCost ( double cost ) {
+     propertyCost = cost;
+  }
+   
+  // Set the down payment attribute (instance variable) of the object
+   public void setDownPayment ( double dp ) {
+     downPayment = dp;
+  }
+
+  // Get the name attribute (instance variable) of the object
+  public String getName () {
+     return name;
+  }
+  
+  // Get the city attribute (instance variable) of the object
+  public String getCity () {
+     return cityName;
+  }
+
+  // Get the ID number attribute (instance variable) of the object
+  public int getIdNumber () {
+     return idNumber;
+  }
+  
+  // Get the loan type attribute (instance variable) of the object
+  public String getLoanType () {
+     return loanType;
+  }
+
+  // Get the pay rate attribute (instance variable) of the object
+  public double getPropertyCost () {
+     return propertyCost;
+  }
+  
+  public double getDownPayment() {
+      return downPayment;
+  }
+  
+  // Compute the monthly payment for the individual loan
+  public double computeMonthlyPayment() {
+      return 0.0;
+  }
+  
+  // Return a string comprised of all the info on the loan
+  public String toString() {
+     return  name + 
+             ", ID Number= " + idNumber;
+  }
+}

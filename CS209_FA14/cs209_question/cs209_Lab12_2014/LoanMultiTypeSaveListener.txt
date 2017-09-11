@@ -1,0 +1,60 @@
+
+package fileexs;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.io.*;
+
+// Purpose:  To handle an event caused by user selection of Save action from GUI
+public class LoanMultiTypeSaveListener implements ActionListener  {
+   private LoanMultiTypeSeqFileExer fr;    // Hold reference to JFrame subclass instance
+   private DataOutputStream output;  // Stream for outputting data to file
+   private File selectedFile;        // The file selected by user
+   private String path = "C:\\";     // Path for file selection dialog
+
+   // Constructor
+   public LoanMultiTypeSaveListener( JFrame f, String pt ) {
+      fr = (LoanMultiTypeSeqFileExer)f;
+      path = pt;
+   }
+
+   //  Perform action using the file save operation selected by user
+   public void actionPerformed( ActionEvent e ) {
+      JFileChooser JFChoose = new JFileChooser(path);
+      int result = JFChoose.showSaveDialog( fr );
+      selectedFile = JFChoose.getSelectedFile();
+
+      // Respond to a user press of the Cancel button
+      if ( result == JFileChooser.CANCEL_OPTION )
+         return;
+
+      try { // try to create an object representing the user-selected file
+         output = new DataOutputStream( new FileOutputStream( selectedFile ));
+      }
+      catch ( Exception ex )  {
+        System.out.println( "\nIn FileSaveHandler, Open try block: " + ex.toString() );
+      }
+
+      try  { // try to write the file
+         Loan ln;
+         for ( int i = 0; i < fr.getLoanCount(); i++ ) {
+            ln = fr.getLoanFromArray( i );
+            output.writeChars( ln.getName() );
+            output.writeChars( ";" );
+            output.writeInt( ln.getIdNumber() );
+         }
+         fr.displayLoanData();
+      }
+      catch ( Exception ex ) {
+         System.out.println( "\nIn FileSaveHandler, Write try block: " + ex.toString());
+      }
+
+      try { // try to close the file
+         output.close();
+      }
+      catch ( Exception ex ) {
+         System.out.println( "\nIn FileSaveHandler, Close try block: " + ex.toString() );
+      }
+   }
+}
+

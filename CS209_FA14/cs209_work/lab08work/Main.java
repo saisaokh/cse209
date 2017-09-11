@@ -1,0 +1,267 @@
+package lab06b;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
+
+public class Main extends JFrame {
+
+    // Prompts for user input
+
+    private JLabel label1, label2, label3, label4, label6,
+            label7, label8, label9, label10;
+    // Mechanisms for user input
+    private JTextField textfield1, textfield2, textfield3, textfield4,
+            textfield7, textfield8, textfield9;
+    private JComboBox typeJCB, typeCity;  // The JComboBox for type selection
+    private JScrollPane bar;
+
+    // Mechanism for output display
+    private JTextArea textDisplay;        // Output display area
+    private int textDisplayWidth = 25;    // Width of the JTextArea
+    private int textDisplayHeight = 18;   // Height of the JTextArea
+    private boolean cannotAddFlag = false; // Indicates whether loan can be added
+
+    private final int MAX_LOANS = 5;  // The maximum number of loans allowed
+    private int countLoans = 0;        // The number of loans added to array
+    private Taxpayer loanArray[] = new Taxpayer[MAX_LOANS];
+
+    private String typeNames[] = {"Residential", "Commercial", "Agricultural", "Unspecified"};
+    private String selectedType = "Residential";
+
+    //*****************
+    private String cityName[] = {"Albany", "Binghamton", "Buffalo", "Ithaca", "Latham", "Peekskill", "Plattsburg", "Rochester", "Syracuse", "Utica"};
+    private String selectedCity = "Albany";
+
+    // The main method required for an application program
+    public static void main(String[] args) {
+        JFrame frame = new Main(); // Construct the window
+        frame.setSize(new Dimension(360, 600));     // Set its size
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);   // Make the window visible
+    }
+
+    public Main() {
+        super("GUI Demonstration");
+        setLayout(new BorderLayout());
+
+        JPanel jpan = new JPanel();
+        jpan.setLayout(new GridLayout(9, 2)); //*************5,2
+        jpan.setBorder(new EtchedBorder());
+        add(jpan, BorderLayout.NORTH);
+
+        // Display the maximum number of loans to be processed
+        label1 = new JLabel("Number of Loans:");
+        jpan.add(label1);
+        textfield1 = new JTextField(3);
+        textfield1.setEditable(false);
+        textfield1.setText(Integer.toString(countLoans));
+        jpan.add(textfield1);  // put input JTextField on JPanel
+
+        label2 = new JLabel("Max # of Loans:");
+        jpan.add(label2);
+        textfield2 = new JTextField(3);
+        textfield2.setText(Integer.toString(MAX_LOANS));
+        textfield2.setEditable(false);
+        jpan.add(textfield2);  // put input JTextField on JPanel
+
+        // Create prompt and input mechanism to get loan type from user
+        label6 = new JLabel("Loan Type:");
+        jpan.add(label6);
+        typeJCB = new JComboBox(typeNames);
+        typeJCB.setMaximumRowCount(4);
+        jpan.add(typeJCB);  // put input JTextField on JPanel
+
+        //************************
+        label10 = new JLabel("City:");
+        jpan.add(label10);
+        typeCity = new JComboBox(cityName);
+        typeCity.setMaximumRowCount(4);
+        jpan.add(typeCity);
+        //****************************
+
+        // Create prompt and input mechanism to get borrower name from user
+        label3 = new JLabel("Name:");
+        jpan.add(label3);
+        textfield3 = new JTextField(15);
+        jpan.add(textfield3);  // put input JTextField on JPanel       
+
+        // Create prompt and input mechanism to get loan number from user
+        label4 = new JLabel("Loan ID Number:");
+        jpan.add(label4);
+        textfield4 = new JTextField(Integer.toString(countLoans + 2), 15);
+        jpan.add(textfield4);   // put input JTextField on JPanel        
+
+        //****************************
+        label7 = new JLabel("Property Cost");
+        jpan.add(label7);
+        textfield7 = new JTextField(15);
+        jpan.add(textfield7);
+
+        label8 = new JLabel("Down Payment");
+        jpan.add(label8);
+        textfield8 = new JTextField(15);
+        jpan.add(textfield8);
+
+        label9 = new JLabel("Years");
+        jpan.add(label9);
+        textfield9 = new JTextField(15);
+        jpan.add(textfield9);
+
+        //****************************
+        // Set up JTextArea to display information on all the loans
+        textDisplay = new JTextArea(getDataStringAllLoans(),
+                textDisplayHeight, textDisplayWidth);
+        textDisplay.setLineWrap(true);
+        textDisplay.setWrapStyleWord(true);
+        textDisplay.setBorder(new TitledBorder("Loan List"));
+       // add(textDisplay,BorderLayout.CENTER);
+
+        bar = new JScrollPane(textDisplay);
+        add(bar, BorderLayout.CENTER);
+
+        // Listener will respond to a user hitting Enter in any JTextField
+        MyActionListener myActListener = new MyActionListener();
+        textfield3.addActionListener(myActListener);
+        textfield4.addActionListener(myActListener);
+
+        textfield7.addActionListener(myActListener);
+        textfield8.addActionListener(myActListener);
+        textfield9.addActionListener(myActListener);
+
+        // Listener will respond to a user selecting from JComboBox
+        MyItemListener myItemListener = new MyItemListener();
+        typeJCB.addItemListener(myItemListener);
+
+        typeCity.addItemListener(myItemListener);
+
+        // System.out.println("1"+selectedCity+"\n"+typeCity+"\n"+cityName);
+        // Display data on all Loans in the JTextArea
+        displayLoanData();
+    }
+
+    private void displayLoanData() {
+        setDisplayFields();
+        textDisplay.setText(getDataStringAllLoans());
+    }
+
+    //Residential","Commercial","Agricultural","Unspecified
+    // Create and insert the new loan into array
+    //private void addLoanToArray( String id, String nam, String typ ){ //****************given
+
+    private void addLoanToArray(String nam, String id, String propCost, String downPay, String numYears, String city, String LoanTpe) {
+
+        if (countLoans < MAX_LOANS) {
+            Taxpayer ln;
+            //JPanel jpan = new JPanel();
+            switch (LoanTpe) {
+                case "Residential":
+
+                    ln = new ResidentialLoan(nam, Integer.parseInt(id), Integer.parseInt(propCost), Integer.parseInt(downPay), Integer.parseInt(numYears), city);
+                    loanArray[countLoans] = ln;
+                    countLoans++;
+                    break;
+
+                case "Commercial":
+
+                    ln = new CommercialLoan(nam, Integer.parseInt(id), Integer.parseInt(propCost), Integer.parseInt(downPay), Integer.parseInt(numYears), city);
+                    loanArray[countLoans] = ln;
+                    countLoans++;
+                    break;
+
+                case "Agricultural":
+
+                    ln = new AgriculturalLoan(nam, Integer.parseInt(id), Integer.parseInt(propCost), Integer.parseInt(downPay), Integer.parseInt(numYears), city);
+                    loanArray[countLoans] = ln;
+                    countLoans++;
+                    break;
+
+                case "Unspecified":
+
+                    ln = new UnspecifiedLoan(nam, Integer.parseInt(id), Integer.parseInt(propCost), Integer.parseInt(downPay), Integer.parseInt(numYears), city);
+                    loanArray[countLoans] = ln;
+                    countLoans++;
+                    break;
+
+            }
+        }
+    }
+
+    //  Return the loan instance (object) correponding to the pNumb parameter
+    private Taxpayer getLoanFromArray(int lnNumb) {
+        Taxpayer ln = null;
+        if (lnNumb < countLoans) {
+            ln = loanArray[lnNumb];
+        }
+        return ln;
+    }
+
+    // Set the contents of the JTextFields
+    private void setDisplayFields() {
+        textfield1.setText(Integer.toString(countLoans));
+        textfield2.setText(Integer.toString(MAX_LOANS));
+        textfield3.setText("");
+        textfield4.setText("");
+        //***********************************
+        textfield7.setText("");
+        textfield8.setText("");
+        textfield9.setText("");
+        //***********************************
+    }
+
+    // Get the string comprised of all the data on all loans
+    private String getDataStringAllLoans() {
+        String displayStr = "";
+
+        // Add the information on all loans to the display string
+        displayStr = displayStr + "\n  DOLLARS & 'SENSE' LOANS:\n\n ";
+        for (int i = 0; i < countLoans; i++) {
+            displayStr += (i + 1) + ". " + loanArray[i].toString() + "\n ";
+        }
+        if (cannotAddFlag) {
+            displayStr += "\nCannot add loans - the array is full\n";
+        }
+        return displayStr;
+    }
+
+    class MyActionListener implements ActionListener {
+
+        // Process user's action in JTextField input
+
+        public void actionPerformed(ActionEvent e) {
+            if (countLoans < MAX_LOANS) {
+
+                //*****************
+                String nam = textfield3.getText();
+                String id = textfield4.getText();
+
+                String propCost = textfield7.getText();
+                String downPay = textfield8.getText();
+                String numYears = textfield9.getText();
+
+                addLoanToArray(nam, id, propCost, downPay, numYears, selectedCity, selectedType);
+
+            } else {
+                cannotAddFlag = true;
+            }
+
+            displayLoanData();
+        }
+    }
+
+    class MyItemListener implements ItemListener {
+
+        public void itemStateChanged(ItemEvent e) {
+
+            // If one of the items in the JComboBox was selected,
+            // set the selectedDept variable to the user's selection
+            if (e.getSource() == typeJCB) {
+                selectedType = typeNames[typeJCB.getSelectedIndex()];
+            }
+            if (e.getSource() == typeCity) {
+                selectedCity = cityName[typeCity.getSelectedIndex()];
+            }
+        }
+    }
+}

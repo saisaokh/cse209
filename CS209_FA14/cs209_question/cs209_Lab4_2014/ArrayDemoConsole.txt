@@ -1,0 +1,53 @@
+/*
+ * ArrayDemoConsole.java
+ */
+package arrayexs;
+import javax.swing.*;
+
+public class ArrayDemoConsole {
+    
+    public static void main(String [] args) {
+        final int LIMIT = 5;       // Max size of array
+        double A[] = new double [LIMIT];  // Array declaration and creation
+        int countA = 0;         // Count the numbers entered into array A
+        String numbStr;         // The number entered by user, as a string
+        double numb;               // The number entered by user, as an double
+        String promptAStr = ""; // String to prompt user for data entry
+        String arrayAStr = "";  // String comprised of array elements       
+        String outputStr = "";  // String to display output to user
+        
+        for (int i = 0; i < A.length; i++) {
+            // Prompt and get number from user as a string
+            promptAStr = "Array elements: " + arrayAStr + "\n" +
+                    "Enter number #" + (i+1) + " to insert into first array\n";            
+            numbStr = JOptionPane.showInputDialog(promptAStr);
+            // Convert the number from type String to type double
+            numb = Double.parseDouble(numbStr);
+            // Insert the number into the next available position in array
+            A[countA] = numb;
+            // Increment the counter that keeps track of the number of entries
+            countA++;
+            // Create a string to display all numbers entered into the array so far
+            arrayAStr = "";
+            for (int j = 0; j < countA; j++) {
+                arrayAStr += A[j] + " ";
+            }  
+        }
+   System.out.println(arrayAStr);  
+   outputStr = "\nThe number of elements in the array A is: " + A.length + "\n"
+                     + "The elements of array A: " + arrayAStr + "\n"
+                     + "Sum of the elements of array A: " + arraySum(A);
+        
+        System.out.println(outputStr);
+        System.exit( 0 );   // Exit the program properly
+    }
+       
+    // Compute the sum of the elements in an array
+    public static double arraySum(double Z[]) {
+       double sum = 0;
+        for( int i = 0; i < Z.length; i++ ) {
+            sum += Z[i];
+        }
+        return sum;
+    }
+}

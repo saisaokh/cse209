@@ -1,0 +1,70 @@
+
+package fileexs;    
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.io.*;
+
+// Purpose:  To handle an event caused by user selection of Open action from GUI
+public class LoanMultiTypeOpenListener implements ActionListener  {
+   private LoanMultiTypeSeqFileExer fr;    // Hold reference to JFrame subclass instance
+   private DataInputStream input;    // Stream for inputting data from file
+   private File selectedFile;        // The file selected by user
+   private String path = "C:\\";     // Path for file selection dialog
+
+   // Constructor
+   public LoanMultiTypeOpenListener( JFrame f, String pt ) {
+      fr = (LoanMultiTypeSeqFileExer)f;
+      path = pt;
+   }
+
+   //  Perform action using the file Open operation selected by user from menu
+   public void actionPerformed( ActionEvent e ) {
+
+      JFileChooser JFChoose = new JFileChooser(path);
+      int result = JFChoose.showOpenDialog( fr );
+      selectedFile = JFChoose.getSelectedFile();
+
+      // Respond to a user press of the Cancel button
+      if ( result == JFileChooser.CANCEL_OPTION )
+         return;
+
+      try { // try to create an object representing the user-selected file
+         input = new DataInputStream( new FileInputStream( selectedFile ) );
+      }
+      catch ( Exception ex )  {
+          System.out.println( "\nIn FileOpenHandlerM, Open try block: " + ex.toString() );
+      }
+
+      try { // try to read the file and create a string consisting of its contents
+         char ch;
+         fr.setLoanCount( 0 );
+         String name;
+         int idNumber;
+
+         do { // read data from the file until end of file is reached
+            name = "";
+            ch = input.readChar();
+            while ( ch != ';' ) {
+               name = name + ch;
+               ch = input.readChar();
+            }
+            idNumber = input.readInt();
+            fr.addLoanToArray( name, idNumber );
+         } while ( true );
+      }
+      catch ( Exception ex ) {
+         System.out.println( "\nIn FileOpenHandler, Read try block: " + ex.toString() );
+      }
+
+      //fr.setMessageToUser( "Opened and read the file:   " + selectedFile.getName() );
+      fr.displayLoanData();
+
+      try { // try to close the file
+         input.close();
+      }
+      catch ( Exception ex ) {
+         System.out.println( "\nIn FileOpenHandler, Close try block: " + ex.toString() );
+      }
+   }
+}

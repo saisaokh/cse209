@@ -1,0 +1,291 @@
+
+package fileexs;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import java.io.*;
+
+public class LoanMultiTypeSeqFileExer extends JFrame {
+    // ---------------- File-related variables  ----------------------------------
+    private String docPath = "C:\\";
+    private JButton openButton,  // Button to initiate an open file action
+            saveButton,     // Button to initiate a save file action
+            saveTextButton; // Button to initiate an action to save text version
+                            // of all the Loan data
+    
+    // ---------------- End file-related variables  ----------------------------------
+    
+    // Prompts for user input
+    private JLabel label0, label1, label2, label3, label4, label6;
+    // Mechanisms for user input
+    private JTextField textfield0, textfield1, textfield2, textfield3, textfield4;
+    
+    // Mechanism for output display
+    private JTextArea jtextArea;        // Output display area
+    private int jtextAreaWidth = 25;    // Width of the JTextArea
+    private int jtextAreaHeight = 18;   // Height of the JTextArea
+    
+    // Flags to determine output to user
+    private boolean cannotAddFlag = false; // Indicates whether loan can be added
+    private boolean cannotRetrieveFlag = false; //Indicates if loan can be retrieved
+    
+    private final int MAX_LOANS = 10;  // The maximum number of loans allowed
+    private int countLoans = 0;        // The number of loans added to array
+    private Loan loanArray [] = new Loan[MAX_LOANS];
+
+    
+    // The main method required for an application program
+    public static void main( String[] args )  {
+        JFrame frame =  new LoanMultiTypeSeqFileExer( ); // Construct the window
+        frame.setSize( new Dimension( 420, 470 ) );     // Set its size
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible( true );   // Make the window visible
+    }
+    
+    public LoanMultiTypeSeqFileExer() {
+        super("File Demonstration");
+        Container c = getContentPane();
+        c.setLayout( new BorderLayout() );
+        
+        JPanel jpan = new JPanel();
+        jpan.setLayout(new GridLayout(5,2));
+        jpan.setBorder(new EtchedBorder());
+        c.add(jpan,BorderLayout.NORTH);
+        
+        // Create prompt and input mechanism to get loan number from user
+        label1 = new JLabel("Number of Loans:");
+        jpan.add( label1);
+        textfield1 = new JTextField( 3 );
+        textfield1.setEditable(false);
+        textfield1.setText(Integer.toString(countLoans));
+        jpan.add( textfield1 );  // put input JTextField on JPanel
+        
+        label2 = new JLabel("Max # of Loans:");
+        jpan.add( label2 );
+        textfield2 = new JTextField( 3);
+        textfield2.setText(Integer.toString(MAX_LOANS));
+        textfield2.setEditable(false);
+        jpan.add( textfield2 );  // put input JTextField on JPanel
+        
+        // Create prompt and input mechanism to get loan array position from user
+        label0 = new JLabel("Loan Position in List (1-" + MAX_LOANS + ")");
+        jpan.add( label0 );
+        textfield0 = new JTextField( 15 );
+        jpan.add( textfield0 );  // put input JTextField on JPanel
+        
+        // Create prompt and input mechanism to get borrower's name from user
+        label3 = new JLabel("Borrower's Name:");
+        jpan.add( label3 );
+        textfield3 = new JTextField( 15 );
+        jpan.add( textfield3 );  // put input JTextField on JPanel
+        
+        // Create prompt and input mechanism to get loan number from user
+        label4 = new JLabel("Loan ID Number:");
+        jpan.add( label4 );
+        textfield4 = new JTextField( Integer.toString(countLoans+2), 15 );
+        jpan.add( textfield4 );   // put input JTextField on JPanel
+        
+        // Set up JTextArea to display information on all the loans
+        jtextArea = new JTextArea( getDataStringAllLoans(),
+                jtextAreaHeight,jtextAreaWidth);
+        jtextArea.setLineWrap( true );
+        jtextArea.setWrapStyleWord( true );
+        jtextArea.setBorder(new TitledBorder("Dollars&Sense Loan List"));
+        c.add(jtextArea,BorderLayout.CENTER);
+        
+        // Listener will respond to a user hitting Enter in any JTextField
+        MyActionListenerForLoanRetrieve myActListenerForRetrieve = new MyActionListenerForLoanRetrieve();
+        textfield0.addActionListener( myActListenerForRetrieve );
+        MyActionListenerForLoanInsert myActListenerForInsert = new MyActionListenerForLoanInsert();
+        textfield3.addActionListener( myActListenerForInsert );
+        textfield4.addActionListener( myActListenerForInsert );
+        
+        
+        // --------- Begin construction of JPanel for file operation components ---------
+        
+        // Create button panel for file operations
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout( new GridLayout( 1, 2 ) );
+        buttonPanel.setBorder(new TitledBorder("File Operations"));
+        
+        // Create button for Open File action, attach ActionListener, add to GUI
+        openButton = new JButton("Open File");
+        openButton.addActionListener( new LoanMultiTypeOpenListener( this, docPath ) );
+        buttonPanel.add(openButton);
+        
+        // Create button for Save File action, attach ActionListener, add to GUI
+        saveButton = new JButton("Save File");
+        saveButton.addActionListener( new LoanMultiTypeSaveListener( this, docPath ) );
+        buttonPanel.add(saveButton);
+        
+        c.add( buttonPanel, BorderLayout.SOUTH );
+        
+        // --------- End construction of JPanel for file operation components -----------
+        
+        // Display data on all Loans in the JTextArea
+        displayLoanData();
+    }
+    
+    public int getLoanCount() {
+        return countLoans;
+    }
+    
+    public void setLoanCount( int i ) {
+        countLoans = i;
+    }
+    
+    public void resetFlags() {
+        cannotAddFlag = false; 
+        cannotRetrieveFlag = false;
+    }
+    
+    // Insert the new loan into array
+    protected void addLoanToArray( Loan ln){
+        if ( countLoans < MAX_LOANS ) {
+            loanArray[countLoans] = ln;
+            countLoans++;
+        }
+    }
+    
+    // Create and insert the new loan into array
+    protected void addLoanToArray( String nam, String id ){
+        if ( countLoans < MAX_LOANS ) {
+            Loan ln = new Loan(nam, Integer.parseInt(id));
+            loanArray[countLoans] = ln;
+            countLoans++;
+        }
+    }
+    
+    protected void addLoanToArray( String nam, int id ){
+        if ( countLoans < MAX_LOANS ) {
+            Loan ln = new Loan(nam, id);
+            loanArray[countLoans] = ln;
+            countLoans++;
+        }
+    }
+    
+    // Replace an loan in array
+    protected void replaceLoanInArray( int pos, String nam, String id ){
+        if ( pos < countLoans ) {
+            Loan ln = new Loan(nam, Integer.parseInt(id));
+            loanArray[pos] = ln;
+        }
+    }
+    
+    //  Return the loan instance (object) correponding to the pNumb parameter
+    protected Loan getLoanFromArray( int pNumb ) {
+        Loan ln = null;
+        if ( pNumb < countLoans ) {
+           ln = loanArray[pNumb];
+        }
+        return ln;
+    }
+    
+    protected void displayLoanData(){
+        setDisplayFields();
+        jtextArea.setText(getDataStringAllLoans());
+    }
+    
+    // Display the data on the selected loan in the JTextFields;
+    // display the information on the loan list in the JTextArea
+    private void displayLoanData( int pNumb ) {
+        
+        if (( countLoans > 0 ) && (pNumb >= 0) && (pNumb < countLoans)) {
+            Loan ln = loanArray[ pNumb ];
+            // Set the text to be displayed in the JTextFields
+            setDisplayFields(
+                    pNumb + 1,
+                    ln.getName(),
+                    ln.getIdNumber());
+            
+        } else {
+            // Set the JTextFields to empty strings
+            setDisplayFields() ;
+        }
+        // Display the loan list in the JTextArea
+        jtextArea.setText( getDataStringAllLoans());
+    }
+    
+    // Set the contents of the JTextFields
+    protected void setDisplayFields() {
+        textfield0.setText("");
+        textfield1.setText( Integer.toString(countLoans) );
+        textfield2.setText( Integer.toString(MAX_LOANS) );
+        textfield3.setText("");
+        textfield4.setText("");
+    }
+    
+    protected void setDisplayFields(int pos, String nam, int id) {
+        textfield0.setText( Integer.toString(pos) );
+        textfield1.setText( Integer.toString(countLoans) );
+        textfield2.setText( Integer.toString(MAX_LOANS) );
+        textfield3.setText( nam );
+        textfield4.setText( Integer.toString(id) );
+    }
+    
+    
+    // Get the string comprised of all the data on all loans
+    protected String getDataStringAllLoans() {
+        String displayStr = "";
+        if ( cannotAddFlag )
+            displayStr += "Cannot add loans - the array is full\n\n";
+        if ( cannotRetrieveFlag )
+            displayStr += "Cannot retrieve loan from the indicated position - " +
+                    "no loan at that list position\n\n";
+        
+        // Add the information on all loans to the display string
+        //displayStr = displayStr + "\n";
+        for ( int i = 0; i < countLoans; i++ ) {
+            displayStr += (i+1) + ". " + loanArray[i].toString() + "\n ";
+        }
+
+        return displayStr;
+    }
+    
+    class MyActionListenerForLoanInsert implements ActionListener {
+        // Process user's action in JTextField input
+        public void actionPerformed( ActionEvent e) {
+            int pos = 0;
+            String name = null;
+            String idNumberStr = null;
+            String tempPosStr = textfield0.getText().trim();
+            if (tempPosStr.length() > 0) {
+                pos = Integer.parseInt(tempPosStr);
+            }
+            name = textfield3.getText();
+            idNumberStr = textfield4.getText();
+            if (pos >= 1 && pos <= countLoans) {
+                replaceLoanInArray(pos - 1, name, idNumberStr);
+            } else if ( countLoans < MAX_LOANS )  {
+                addLoanToArray(name, idNumberStr);
+            } else {
+                cannotAddFlag = true;
+            }
+            displayLoanData();
+            resetFlags();
+        }
+    }
+    
+    class MyActionListenerForLoanRetrieve implements ActionListener {
+        // Process user's action in JTextField input
+        public void actionPerformed( ActionEvent e) {
+            int selectedIndex = 0;
+            Loan ln = null;
+            if (textfield0.getText() != null  &&  textfield0.getText().trim().length() > 0) {
+                selectedIndex = Integer.parseInt(textfield0.getText().trim());
+                if ( countLoans > 0  && selectedIndex > 0 &&  selectedIndex <= countLoans )  {
+                    displayLoanData(selectedIndex - 1);
+                } else {
+                    cannotRetrieveFlag = true;
+                    displayLoanData();
+                }                
+            } else {
+                cannotRetrieveFlag = true;
+                displayLoanData();
+            }
+            resetFlags();
+        }
+    }    
+}
+
